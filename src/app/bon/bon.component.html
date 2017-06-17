@@ -1,0 +1,5 @@
+<div class="bon-container">
+  <button class="bon" md-raised-button [style.backgroundColor]="bon.color" (click)="addToBill()"><strong>{{ bon.name }}</strong><br/>{{ bon.price }}€</button>
+  <button md-button class="overlay" *ngIf="mode == BonMode.Edit"><md-icon class="edit-icon">edit</md-icon></button>
+  <button md-button class="overlay" *ngIf="mode == BonMode.Remove" (click)="delete()"><md-icon class="remove-icon">close</md-icon></button>
+</div>

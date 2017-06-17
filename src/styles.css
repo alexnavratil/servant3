@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.margin-box {
+  padding: 0;
+  margin: 15px;
+}
+
+.bill-box {
+  height: calc( 100% - 400px );
+}
+
+.calculator-box {
+  height: 400px;
+}
+
+.mat-toolbar {
+  padding: 0 !important;
+}
+
+.row {
+  margin-left: 0 !important;
+  margin-right: 0!important;
+}
+
+.bon-list button {
+  margin: 10px;
+}
+
+.fill-space {
+  flex: 1 1 auto;
+}
+
+.flex {
+  display: flex !important;
+}

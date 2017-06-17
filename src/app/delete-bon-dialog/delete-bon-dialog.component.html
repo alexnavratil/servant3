@@ -1,0 +1,6 @@
+<h2 md-dialog-title>Bon löschen</h2>
+<p>Wollen Sie den Bon <strong>{{ bon.name }}</strong> wirklich löschen?</p>
+<md-dialog-actions>
+  <button md-button md-dialog-close>Nein</button>
+  <button md-button [md-dialog-close]="true">Ja</button>
+</md-dialog-actions>
