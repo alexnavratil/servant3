@@ -1,0 +1,22 @@
+<div fxLayout="column" fxFlex="400px">
+  <h2 md-dialog-title *ngIf="!editMode">Neuen Bon hinzufügen</h2>
+  <h2 md-dialog-title *ngIf="editMode">Bon bearbeiten</h2>
+  <form #f="ngForm" fxLayout="column">
+    <md-dialog-content fxLayout="column" fxFlex="170px">
+      <md-input-container fxFlex>
+        <input mdInput name="name" [(ngModel)]="bon.name" placeholder="Name" required>
+      </md-input-container>
+      <md-input-container fxFlex>
+        <input mdInput name="price" [(ngModel)]="bon.price" placeholder="Preis" min="0" type="number" required>
+      </md-input-container>
+      <div fxFlex fxLayout="row">
+        <strong>Farbe:</strong>&nbsp;
+        <input ngModel name="color" [(ngModel)]="bon.color" placeholder="Farbe" type="color" required>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+      <button md-button md-dialog-close id="btn-cancel">Abbrechen</button>&nbsp;
+      <button md-button id="btn-add" type="submit" [disabled]="!f.form.valid" [md-dialog-close]="bon"><span *ngIf="!editMode">Hinzufügen</span><span *ngIf="editMode">Speichern</span></button>
+    </md-dialog-actions>
+  </form>
+</div>

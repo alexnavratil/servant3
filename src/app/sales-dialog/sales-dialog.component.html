@@ -1,0 +1,13 @@
+<h2 md-dialog-title>Umsatz</h2>
+<md-dialog-content>
+  <md-list>
+    <md-list-item *ngFor="let salesTuple of salesResult" [style.background-color]="salesTuple[0].color">{{ salesTuple[1] }}x {{ salesTuple[0].name }} => {{ format(salesTuple[2]) }}</md-list-item>
+  </md-list>
+  <hr/>
+  <span><strong>Umsatz: </strong> {{ format(totalSales) }}€ </span><br/>
+  <hr/>
+  <button md-raised-button style="background-color: #f44336" (click)="resetSales()">Umsatz zurücksetzen</button>
+</md-dialog-content>
+<md-dialog-actions>
+  <button md-button md-dialog-close>Schließen</button>
+</md-dialog-actions>

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {Bon} from "../bon";
+import {MD_DIALOG_DATA} from "@angular/material";
 
 @Component({
   selector: 'app-delete-bon-dialog',
@@ -7,8 +8,7 @@ import {Bon} from "../bon";
   styleUrls: ['./delete-bon-dialog.component.css']
 })
 export class DeleteBonDialogComponent {
-  public bon: Bon;
 
-  constructor() { }
+  constructor(@Inject(MD_DIALOG_DATA) public bon: Bon) { }
 
 }

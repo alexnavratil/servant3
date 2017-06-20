@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Bon} from "./bon";
 import {v4} from "uuid";
 import {forEach} from "@angular/router/src/utils/collection";
@@ -6,43 +6,86 @@ import {ReplaySubject} from "rxjs/ReplaySubject";
 
 @Injectable()
 export class BonService {
-  private bonList: Array<Bon> = null;
-  private bonListSubject: ReplaySubject<Array<Bon>> = new ReplaySubject<Array<Bon>>(1);
-  private readonly storageId = "bonlist";
+  private bonMap: Map<string, Bon> = null;
+  private bonMapSubject: ReplaySubject<Map<string, Bon>> = new ReplaySubject<Map<string, Bon>>(1);
+  private readonly storageId = "bonmap";
 
   constructor() {
-    if(window.localStorage.getItem(this.storageId)) {
-      this.bonList = JSON.parse(window.localStorage.getItem(this.storageId));
-      this.bonListSubject.next(this.bonList);
+    let storageBonMap = window.localStorage.getItem(this.storageId);
+    if (storageBonMap) {
+      this.initializeMap(JSON.parse(storageBonMap));
+      this.bonMapSubject.next(this.bonMap);
     } else {
-      this.bonList = [];
+      this.bonMap = new Map<string, Bon>();
       this.save();
     }
   }
 
-  public list(): ReplaySubject<Array<Bon>> {
-    return this.bonListSubject;
+  private initializeMap(json: Object) {
+    this.bonMap = new Map<string, Bon>();
+    for (var uuid in json) {
+      this.bonMap.set(uuid, json[uuid]);
+    }
+  }
+
+  public list(): ReplaySubject<Map<string, Bon>> {
+    return this.bonMapSubject;
   }
 
   public add(bon: Bon) {
-    if(bon.uuid == null) {
+    if (bon.uuid == null) {
       bon.uuid = v4();
     }
 
-    this.bonList.push(bon);
+    this.bonMap.set(bon.uuid, bon);
+    this.save();
+  }
+
+  public edit(updatedBon: Bon) {
+    this.bonMap.set(updatedBon.uuid, new Bon(
+      updatedBon.name,
+      updatedBon.price,
+      updatedBon.color,
+      updatedBon.uuid,
+      updatedBon.sortNr
+    ));
+
+    this.save();
+  }
+
+  public batchEdit(updatedBonList: Array<Bon>) {
+    updatedBonList.forEach(updatedBon => {
+      this.bonMap.set(updatedBon.uuid, new Bon(
+        updatedBon.name,
+        updatedBon.price,
+        updatedBon.color,
+        updatedBon.uuid,
+        updatedBon.sortNr
+      ));
+    });
+
     this.save();
   }
 
   public remove(bon: Bon) {
-    this.bonList = this.bonList.filter(filterBon => {
-      return bon != filterBon;
-    });
+    this.bonMap.delete(bon.uuid);
     this.save();
   }
 
   public save() {
-    window.localStorage.setItem(this.storageId, JSON.stringify(this.bonList));
-    this.bonListSubject.next(this.bonList);
+    let bonObject = {};
+    this.bonMap.forEach((bon, uuid) => bonObject[uuid] = bon);
+    window.localStorage.setItem(this.storageId, JSON.stringify(bonObject));
+    this.bonMapSubject.next(this.bonMap);
+  }
+
+  public import(json: string) {
+    this.initializeMap(JSON.parse(json));
+    this.save();
+  }
+
+  public export(): string {
+    return window.localStorage.getItem(this.storageId);
   }
 
 }

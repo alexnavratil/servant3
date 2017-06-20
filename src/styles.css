@@ -1,32 +1,32 @@
+html {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 body {
   margin: 0;
   font-family: Roboto, Arial, sans-serif;
+  height: 100vh;
 }
 
-.margin-box {
-  padding: 0;
-  margin: 15px;
-}
-
-.bill-box {
-  height: calc( 100% - 400px );
-}
-
-.calculator-box {
-  height: 400px;
+.mat-app-background {
+  height: 100%;
 }
 
 .mat-toolbar {
   padding: 0 !important;
 }
 
-.row {
-  margin-left: 0 !important;
-  margin-right: 0!important;
-}
-
 .bon-list button {
   margin: 10px;
+}
+
+.bon-list {
+  overflow-y: auto;
 }
 
 .fill-space {
@@ -35,4 +35,29 @@ body {
 
 .flex {
   display: flex !important;
+}
+
+.content {
+  margin: 10px;
+  overflow: auto
+}
+
+.mat-ripple {
+  transition: none !important;
+  display: none !important;
+  visibility: hidden;
+}
+
+.mat-button-focus-overlay {
+  transition: none !important;
+  display: none !important;
+  visibility: hidden;
+}
+
+.mat-raised-button {
+  transition: none !important;
+}
+
+.mat-list-item-content {
+  width: 100%;
 }

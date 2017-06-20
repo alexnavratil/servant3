@@ -1,6 +1,7 @@
-<div class="mat-app-background">
+<div class="mat-app-background" fxLayout="column" fxFill>
   <md-toolbar>
-    <md-icon>home</md-icon> Servant 3
+    &nbsp;<md-icon>home</md-icon>&nbsp;
+    Servant 3
     <span class="fill-space"></span>
 
     <button md-icon-button [mdMenuTriggerFor]="appMenu">
@@ -8,53 +9,71 @@
     </button>
 
     <md-menu #appMenu="mdMenu">
-      <button md-menu-item> Daten importieren </button>
-      <button md-menu-item> Daten exportieren </button>
-      <button md-menu-item> Umsatz </button>
-      <button md-menu-item> Einstellungen </button>
+      <button md-menu-item (click)="import()"> Daten importieren</button>
+      <button md-menu-item (click)="export()"> Daten exportieren</button>
+      <button md-menu-item (click)="openSalesDialog()"> Umsatz</button>
+      <button md-menu-item (click)="openSortDialog()"> Bons sortieren</button>
+      <button md-menu-item (click)="stopPropagation($event)">
+        <md-slide-toggle (change)="addBonChanged($event)" labelPosition="before">Bon hinzufügen</md-slide-toggle>
+      </button>
+      <button md-menu-item (click)="stopPropagation($event)">
+        <md-slide-toggle (change)="editBonChanged($event)" #editBonToggle labelPosition="before">Bon bearbeiten
+        </md-slide-toggle>
+      </button>
+      <button md-menu-item (click)="stopPropagation($event)">
+        <md-slide-toggle (change)="deleteBonChanged($event)" #deleteBonToggle labelPosition="before">Bon entfernen&nbsp;&nbsp;</md-slide-toggle>
+      </button>
     </md-menu>
   </md-toolbar>
 
-  <div class="row">
-    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" style="padding: 0">
-      <div class="margin-box" style="margin-right: 5px">
-        <md-card>
-          <md-card-title class="flex">Bons
-            <span class="fill-space"></span>
-            <button md-icon-button [mdMenuTriggerFor]="bonMenu">
-              <md-icon>more_vert</md-icon>
-            </button>
-
-            <md-menu #bonMenu="mdMenu">
-              <button md-menu-item (click)="stopPropagation($event)"><md-slide-toggle (change)="addBonChanged($event)" labelPosition="before">Bon hinzufügen</md-slide-toggle></button>
-              <button md-menu-item (click)="stopPropagation($event)"><md-slide-toggle (change)="editBonChanged($event)" #editBonToggle labelPosition="before">Bon bearbeiten</md-slide-toggle></button>
-              <button md-menu-item (click)="stopPropagation($event)"><md-slide-toggle (change)="deleteBonChanged($event)" #deleteBonToggle labelPosition="before">Bon entfernen&nbsp;&nbsp;</md-slide-toggle></button>
-            </md-menu>
-          </md-card-title>
-          <div class="bon-list">
-            <app-bon *ngFor="let b of bonList; trackBy: bonUUID" [bon]="b" [mode]="bonMode" (change)="bonChange($event)"></app-bon>
-            <button *ngIf="addBonMode" md-raised-button color="accent" style="width: 100px; height: 100px;">
-              <md-icon>add</md-icon><br/><strong>Neuer Bon</strong>
-            </button>
-          </div>
-        </md-card>
-      </div>
+  <div class="content" fxFlex fxLayout="row" fxLayout.xs="column" fxLayout.sm="column" fxLayout.xs="column"
+       fxLayoutGap="10px">
+    <div class="bons" fxFlex="65%" fxLayoutAlign=" stretch">
+      <md-card fxFlex fxLayout="column">
+        <div class="bon-list" fxFill>
+          <app-bon *ngFor="let b of bonList; trackBy: bonUUID" [bon]="b" [mode]="bonMode"
+                   (change)="bonChange($event)"></app-bon>
+          <button *ngIf="addBonMode" md-raised-button color="accent" (click)="addBon()"
+                  style="width: 130px; height: 130px; vertical-align: top; margin: 12px;">
+            <md-icon>add</md-icon>
+            <br/><strong>Neuer Bon</strong>
+          </button>
+        </div>
+      </md-card>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-      <div class="margin-box" style="margin-left: 5px">
-        <md-card class="bill-box">
-          <md-card-title>Bill</md-card-title>
-          <md-list>
-            <ng-template ngFor let-bon [ngForOf]="billList">
-              <md-list-item [style.backgroundColor]="bon.color"> {{ bonCount(bon) }}x&nbsp;<strong>{{ bon.name }}</strong> </md-list-item>
-              <md-divider></md-divider>
-            </ng-template>
-          </md-list>
-        </md-card>
-        <md-card class="calculator-box">
-          <md-card-title>Calculator</md-card-title>
-        </md-card>
-      </div>
+    <div class="bill-calc" fxFlex fxLayoutAlign=" stretch" fxLayout="column" fxFill>
+      <md-card class="bill-box" fxFlex fxLayout="column">
+        <md-list fxFlex fxFill id="bill-list">
+          <md-list-item *ngFor="let bon of billList" [style.backgroundColor]="bon.color" (click)="reduceBon(bon)">
+            {{ billMap.get(bon.uuid) }}x&nbsp;<strong>{{ bon.name }}</strong>
+            <span class="fill-space"></span>
+            <strong>{{ format(billMap.get(bon.uuid)*bon.price) }}€</strong>
+          </md-list-item>
+        </md-list>
+        <div id="result-line" fxLayout>
+          <strong>Gesamtbetrag:</strong>
+          <span class="fill-space"></span>
+          <strong>{{ format(totalResult) }}€</strong>
+        </div>
+      </md-card>
+      <md-card class="calculator-box" fxFlex="350px">
+        <div fxLayout="column" fxFill>
+          <div fxLayout fxFlex fxLayoutGap="10px">
+            <div fxFlex="80%" fxLayout="column" fxFill fxLayoutGap="4px">
+              <div fxLayout><strong>Gegeben:</strong><span class="fill-space"></span><span id="calc-result">{{ calculatorResult }}</span>
+              </div>
+              <div fxLayout [class.return-error]="returnMoney < 0"><strong>Retour:</strong><span
+                class="fill-space"></span><span id="calc-return">{{ format(returnMoney) }}€</span></div>
+              <app-calculator fxFlex (change)="calculatorChange($event)"></app-calculator>
+            </div>
+            <div fxFlex fxLayout="column" fxLayoutGap="4px">
+              <button md-raised-button fxFlex id="btn-pay" (click)="pay()"><strong>Bezahlen</strong></button>
+              <button md-raised-button fxFlex id="btn-reverse" (click)="revert()"><strong>Stornieren</strong></button>
+              <button md-raised-button fxFlex id="btn-cancel" (click)="reset()"><strong>Abbrechen</strong></button>
+            </div>
+          </div>
+        </div>
+      </md-card>
     </div>
   </div>
 </div>

@@ -1,10 +1,11 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {Bon} from "../bon";
 
 @Component({
   selector: 'app-bon',
   templateUrl: './bon.component.html',
-  styleUrls: ['./bon.component.css']
+  styleUrls: ['./bon.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BonComponent {
   @Input()
@@ -26,6 +27,14 @@ export class BonComponent {
 
   public addToBill(){
     this.change.emit(new BonChange(BonChangeType.AddBill, this.bon));
+  }
+
+  public edit(){
+    this.change.emit(new BonChange(BonChangeType.Edit, this.bon));
+  }
+
+  public format(num: number): string {
+    return Number(num).toFixed(2);
   }
 
 }

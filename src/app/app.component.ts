@@ -1,18 +1,26 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {BonService} from "./bon.service";
 import {Bon} from "./bon";
 import {MdDialog, MdSlideToggle, MdSlideToggleChange} from "@angular/material";
 import {BonChange, BonChangeType, BonMode} from "./bon/bon.component";
 import {DeleteBonDialogComponent} from "./delete-bon-dialog/delete-bon-dialog.component";
+import {CalculatorComponent} from "./calculator/calculator.component";
+import {AddBonComponent} from "./add-bon/add-bon.component";
+import {SalesService} from "./sales.service";
+import {SalesDialogComponent} from "./sales-dialog/sales-dialog.component";
+import {SortDialogComponent} from "./sort-dialog/sort-dialog.component";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
-  public bonList: Array<Bon> = null;
-  public billMap: Map<Bon, number> = new Map<Bon, number>();
+export class AppComponent implements OnInit {
+  public bonMap: Map<string, Bon> = null;
+  public bonList: Array<Bon> = [];
+
+  public billMap: Map<string, number> = new Map<string, number>();
   public addBonMode: boolean = false;
 
   @ViewChild("editBonToggle")
@@ -21,15 +29,46 @@ export class AppComponent {
   @ViewChild("deleteBonToggle")
   private deleteBonToggle: MdSlideToggle;
 
+  @ViewChild(CalculatorComponent)
+  private calculatorComponent: CalculatorComponent;
+
+  public calculatorResult: string = "0.00€";
+  private calculatorResultNum: number = 0;
+
+  public returnMoney: number = 0;
+  public totalResult: number = 0;
+
+  public recalculateReturnMoney() {
+    this.returnMoney = this.calculatorResultNum - this.totalResult;
+  }
+
   public bonMode: BonMode = BonMode.View;
 
   get billList(): Array<Bon> {
-    return Array.from(this.billMap.keys());
+    return Array.from(this.billMap.keys()).map(uuid => this.bonMap.get(uuid));
   }
 
   constructor(private bonService: BonService,
-              private dialog: MdDialog){
-    this.bonService.list().subscribe(bonList => this.bonList = bonList);
+              private salesService: SalesService,
+              private dialog: MdDialog,
+              private changeDetectorRef: ChangeDetectorRef){
+
+  }
+
+  ngOnInit() {
+    this.bonService.list().subscribe(bonMap => {
+      this.bonMap = bonMap;
+      this.regenerateBonList();
+    });
+  }
+
+  private regenerateBonList(){
+    this.bonList = [];
+
+    this.bonMap.forEach(bon => this.bonList.push(bon));
+
+    this.sortBons();
+    this.changeDetectorRef.markForCheck();
   }
 
   public stopPropagation(event){
@@ -37,11 +76,25 @@ export class AppComponent {
   }
 
   public addToBill(bon: Bon){
-    this.billMap.set(bon, this.billMap.has(bon) ? this.billMap.get(bon) + 1 : 1);
+    let currentCount = this.billMap.get(bon.uuid);
+    if(currentCount) {
+      this.billMap.set(bon.uuid, currentCount + 1);
+    } else {
+      this.billMap.set(bon.uuid, 1);
+    }
+
+    this.recalculateTotalResult()
   }
 
-  public bonCount(bon: Bon): number {
-    return this.billMap.get(bon);
+  public reduceBon(bon: Bon){
+    let currentCount = this.billMap.get(bon.uuid);
+    if(--currentCount == 0) {
+      this.billMap.delete(bon.uuid);
+    } else {
+      this.billMap.set(bon.uuid, currentCount);
+    }
+
+    this.recalculateTotalResult();
   }
 
   public bonUUID(_, bon): String {
@@ -71,21 +124,122 @@ export class AppComponent {
   }
 
   public deleteBon(bon: Bon){
-    let dialogRef = this.dialog.open(DeleteBonDialogComponent);
-    dialogRef.componentInstance.bon = bon;
+    let dialogRef = this.dialog.open(DeleteBonDialogComponent, {
+      data: bon
+    });
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
       if(result){
         this.bonService.remove(bon);
+        this.salesService.removeBon(bon);
       }
     });
   }
 
   public bonChange(change: BonChange){
-    if(change.type == BonChangeType.Remove){
-      this.deleteBon(change.bon);
-    } else if(change.type == BonChangeType.AddBill){
+    if(change.type == BonChangeType.AddBill) {
       this.addToBill(change.bon);
+    } else if(change.type == BonChangeType.Remove){
+      this.deleteBon(change.bon);
+    } else if(change.type == BonChangeType.Edit){
+      this.editBon(change.bon);
     }
+  }
+
+  public calculatorChange(change: string) {
+    if(change != "") {
+      this.calculatorResult = (change != "" ? change :  "0.00") + "€";
+      this.calculatorResultNum = parseFloat(change);
+    } else {
+      this.calculatorResult = "0.00€";
+      this.calculatorResultNum = 0.0;
+    }
+
+    this.recalculateReturnMoney();
+  }
+
+  public addBon(){
+    let dialogRef = this.dialog.open(AddBonComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if(result){
+        this.bonService.add(result)
+      }
+    });
+  }
+
+  public editBon(bon: Bon){
+    let dialogRef = this.dialog.open(AddBonComponent, {
+      data: bon
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result){
+        this.bonService.edit(result);
+      }
+    });
+  }
+
+  public recalculateTotalResult() {
+    var total = 0;
+    this.billMap.forEach((count, bonUUID) => {
+      total += this.bonMap.get(bonUUID).price * count;
+    });
+
+    this.totalResult = total;
+
+    this.recalculateReturnMoney();
+  }
+
+  public format(num: number): string {
+    return Number(num).toFixed(2);
+  }
+
+  public reset() {
+    this.billMap = new Map<string, number>();
+    this.calculatorComponent.reset();
+    this.recalculateTotalResult();
+  }
+
+  public pay() {
+    this.salesService.add(this.billMap);
+    this.reset();
+  }
+
+  public revert() {
+    this.salesService.revert(this.billMap);
+    this.reset();
+  }
+
+  public import(){
+    let importPrompt = prompt("Bitte die Importdaten in das Eingabefeld kopieren.");
+
+    if (importPrompt != null && importPrompt != "") {
+      this.bonService.import(importPrompt);
+      alert("Data imported!");
+    }
+  }
+
+  public export(){
+    prompt("", this.bonService.export());
+  }
+
+  public openSalesDialog(){
+    this.dialog.open(SalesDialogComponent);
+  }
+
+  public openSortDialog(){
+    this.dialog.open(SortDialogComponent);
+  }
+
+  private sortBons(){
+    this.bonList = this.bonList.sort((a, b) => {
+      if(a.sortNr == null && b.sortNr == null) {
+        return 0;
+      } else if(a.sortNr == null){
+        return 1;
+      } else if(b.sortNr == null){
+        return -1;
+      } else {
+        return a.sortNr - b.sortNr;
+      }
+    });
   }
 }

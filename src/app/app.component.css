@@ -1,0 +1,25 @@
+#btn-pay {
+  background-color: #4caf50;
+}
+
+#btn-reverse {
+  background-color: #2196f3;
+}
+
+#btn-cancel {
+  background-color: #f44336;
+}
+
+#result-line {
+  padding: 5px 10px;
+  border-top: 2px solid black;
+  font-size: 14pt;
+}
+
+#bill-list {
+  overflow-y: auto;
+}
+
+.return-error {
+  color: red;
+}
