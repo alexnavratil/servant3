@@ -9,10 +9,10 @@ import {
   MdMenuModule,
   MdButtonModule,
   MdCardModule,
-  MdSlideToggleModule,
   MdDialogModule,
   MdListModule,
-  MdInputModule
+  MdInputModule,
+  MdCheckboxModule
 } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {BonService} from "./bon.service";
@@ -25,6 +25,8 @@ import {FormsModule} from "@angular/forms";
 import {SalesService} from "./sales.service";
 import { SalesDialogComponent } from './sales-dialog/sales-dialog.component';
 import { SortDialogComponent } from './sort-dialog/sort-dialog.component';
+import { BillItemComponent } from './bill-item/bill-item.component';
+import { ExportDialogComponent } from './export-dialog/export-dialog.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +36,9 @@ import { SortDialogComponent } from './sort-dialog/sort-dialog.component';
     CalculatorComponent,
     AddBonComponent,
     SalesDialogComponent,
-    SortDialogComponent
+    SortDialogComponent,
+    BillItemComponent,
+    ExportDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -46,16 +50,17 @@ import { SortDialogComponent } from './sort-dialog/sort-dialog.component';
     MdMenuModule,
     MdButtonModule,
     MdCardModule,
-    MdSlideToggleModule,
     MdDialogModule,
     MdListModule,
-    MdInputModule
+    MdInputModule,
+    MdCheckboxModule
   ],
   entryComponents: [
     DeleteBonDialogComponent,
     AddBonComponent,
     SalesDialogComponent,
-    SortDialogComponent
+    SortDialogComponent,
+    ExportDialogComponent
   ],
   providers: [BonService, SalesService],
   bootstrap: [AppComponent]

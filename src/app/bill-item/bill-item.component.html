@@ -1,0 +1,5 @@
+<md-list-item [style.backgroundColor]="bon.color" (click)="onReduce.next(null)">
+  {{ count }}x&nbsp;<strong>{{ bon.name }}</strong>
+  <span class="fill-space"></span>
+  <strong>{{ format(count*bon.price) }}€</strong>
+</md-list-item>

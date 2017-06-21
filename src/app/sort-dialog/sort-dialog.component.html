@@ -1,15 +1,15 @@
 <h2 md-dialog-title>Bons sortieren</h2>
 <md-dialog-content>
   <md-list>
-    <md-list-item *ngFor="let bon of bonList" class="flex">
+    <md-list-item *ngFor="let bon of bonList" class="flex" [style.backgroundColor]="bon.color">
       <span style="white-space: nowrap"><strong>{{ bon.name }}</strong></span>
       <span class="fill-space"></span>
-      <button md-raised-button (click)="up(bon)">up</button>
-      <button md-raised-button (click)="down(bon)">down</button>
+      <button md-raised-button (click)="up(bon)"><md-icon>keyboard_arrow_up</md-icon></button>
+      <button md-raised-button (click)="down(bon)"><md-icon>keyboard_arrow_down</md-icon></button>
     </md-list-item>
   </md-list>
 </md-dialog-content>
 <md-dialog-actions>
-  <button md-button md-dialog-close>Abbrechen</button>&nbsp;
+  <button md-raised-button color="accent" md-dialog-close>Abbrechen</button>&nbsp;
   <button md-raised-button (click)="save()">Speichern</button>
 </md-dialog-actions>

@@ -4,6 +4,11 @@
     Servant 3
     <span class="fill-space"></span>
 
+    <button md-icon-button (click)="toggleFullscreen()">
+      <md-icon *ngIf="isFullscreen">fullscreen</md-icon>
+      <md-icon *ngIf="!isFullscreen">fullscreen_exit</md-icon>
+    </button>
+
     <button md-icon-button [mdMenuTriggerFor]="appMenu">
       <md-icon>more_vert</md-icon>
     </button>
@@ -14,14 +19,14 @@
       <button md-menu-item (click)="openSalesDialog()"> Umsatz</button>
       <button md-menu-item (click)="openSortDialog()"> Bons sortieren</button>
       <button md-menu-item (click)="stopPropagation($event)">
-        <md-slide-toggle (change)="addBonChanged($event)" labelPosition="before">Bon hinzufügen</md-slide-toggle>
+        <md-checkbox (change)="addBonChanged($event)" labelPosition="before">Bon hinzufügen</md-checkbox>
       </button>
       <button md-menu-item (click)="stopPropagation($event)">
-        <md-slide-toggle (change)="editBonChanged($event)" #editBonToggle labelPosition="before">Bon bearbeiten
-        </md-slide-toggle>
+        <md-checkbox (change)="editBonChanged($event)" #editBonToggle labelPosition="before">Bon bearbeiten
+        </md-checkbox>
       </button>
       <button md-menu-item (click)="stopPropagation($event)">
-        <md-slide-toggle (change)="deleteBonChanged($event)" #deleteBonToggle labelPosition="before">Bon entfernen&nbsp;&nbsp;</md-slide-toggle>
+        <md-checkbox (change)="deleteBonChanged($event)" #deleteBonToggle labelPosition="before">Bon entfernen&nbsp;&nbsp;</md-checkbox>
       </button>
     </md-menu>
   </md-toolbar>
@@ -44,11 +49,7 @@
     <div class="bill-calc" fxFlex fxLayoutAlign=" stretch" fxLayout="column" fxFill>
       <md-card class="bill-box" fxFlex fxLayout="column">
         <md-list fxFlex fxFill id="bill-list">
-          <md-list-item *ngFor="let bon of billList" [style.backgroundColor]="bon.color" (click)="reduceBon(bon)">
-            {{ billMap.get(bon.uuid) }}x&nbsp;<strong>{{ bon.name }}</strong>
-            <span class="fill-space"></span>
-            <strong>{{ format(billMap.get(bon.uuid)*bon.price) }}€</strong>
-          </md-list-item>
+          <app-bill-item *ngFor="let bon of billList; trackBy: billUUID" [bon]="bon" [count]="billMap.get(bon.uuid)" (onReduce)="reduceBon(bon)"></app-bill-item>
         </md-list>
         <div id="result-line" fxLayout>
           <strong>Gesamtbetrag:</strong>
